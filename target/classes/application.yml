@@ -1,0 +1,10 @@
+---
+spring:
+  data:
+    mongodb:
+      url: "mongodb://localhost:27017"
+      dbName: ekb_work
+server:
+  port: 4040
+settings:
+  url: 'http://ekb.zarplata.ru'
