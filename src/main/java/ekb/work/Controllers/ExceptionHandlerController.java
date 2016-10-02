@@ -1,17 +1,15 @@
-package ekb.work.Controllers;
+package ekb.work.controllers;
 
-import ekb.work.Domain.ResponseDto;
-import ekb.work.Enums.ResponseStatus;
+import ekb.work.domain.ResponseDto;
+import ekb.work.enums.ResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
 
 /**
  * Created by juliaskvortsova on 9/10/16.

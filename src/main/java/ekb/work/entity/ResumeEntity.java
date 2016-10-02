@@ -1,13 +1,22 @@
-package ekb.work.domain;
+package ekb.work.entity;
 
-import ekb.work.entity.ResumeEntity;
+import ekb.work.domain.EducationDto;
+import ekb.work.domain.ExperienceDto;
+import ekb.work.domain.LanguageLevelDto;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
 /**
- * Created by juliaskvortsova on 9/5/16.
+ * Created by juliaskvortsova on 9/28/16.
  */
-public class ResumeDto {
+@Document(collection = "resume")
+public class ResumeEntity {
+
+    @Id
+    private String _id;
+
     private String id;
     private String name;
     private String dateOfBirth;
@@ -169,28 +178,5 @@ public class ResumeDto {
 
     public void setCategoryId(String categoryId) {
         this.categoryId = categoryId;
-    }
-
-    public ResumeEntity toResumeEntity(){
-        ResumeEntity resumeEntity = new ResumeEntity();
-        resumeEntity.setId(getId());
-        resumeEntity.setCategoryId(getCategoryId());
-        resumeEntity.setName(getName());
-        resumeEntity.setAdditionalInformation(getAdditionalInformation());
-        resumeEntity.setDateOfBirth(getDateOfBirth());
-        resumeEntity.setDescription(getDescription());
-        resumeEntity.setEducation(getEducation());
-        resumeEntity.setEducationLevel(getEducationLevel());
-        resumeEntity.setExperience(getExperience());
-        resumeEntity.setTotalExperience(getTotalExperience());
-        resumeEntity.setJobAreaExperience(getJobAreaExperience());
-        resumeEntity.setJobTitle(getJobTitle());
-        resumeEntity.setLanguages(getLanguages());
-        resumeEntity.setLocation(getLocation());
-        resumeEntity.setLocationPreference(getLocationPreference());
-        resumeEntity.setPersonalInfo(getPersonalInfo());
-        resumeEntity.setSalary(getSalary());
-        resumeEntity.setWorkTypes(getWorkTypes());
-        return resumeEntity;
     }
 }

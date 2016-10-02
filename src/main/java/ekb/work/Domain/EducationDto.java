@@ -1,4 +1,4 @@
-package ekb.work.Domain;
+package ekb.work.domain;
 
 /**
  * Created by juliaskvortsova on 9/9/16.

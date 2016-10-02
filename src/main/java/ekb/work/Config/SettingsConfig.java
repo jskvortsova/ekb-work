@@ -1,4 +1,4 @@
-package ekb.work.Config;
+package ekb.work.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

@@ -1,22 +1,29 @@
-package ekb.work.Services;
+package ekb.work.service;
 
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import ekb.work.Config.SettingsConfig;
-import ekb.work.Domain.CategoryDto;
-import ekb.work.Domain.ResponseDto;
-import ekb.work.Domain.ResumeDto;
+import com.google.common.base.Strings;
+import ekb.work.config.SettingsConfig;
+import ekb.work.domain.CategoryDto;
+import ekb.work.domain.ResumeDto;
+import ekb.work.entity.CategoryEntity;
+//import ekb.work.repository.CategoryRepositoryImpl;
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by juliaskvortsova on 9/4/16.
@@ -43,34 +50,41 @@ public class HtmlContentParseServiceImpl implements HtmlContentParseService {
     private static final String HREF = "href";
     public static final String DIV = "div";
     private static final String XPATH_BY_CLASS_STRING_FORMAT = "//" + DIV + "[@class='%s']";
-
+    public static final int MAX_RESUME_COUNT = 2;
+    public static final String RA_ELEMENTS_LIST_CARD_INFO_CITIES = "ra-elements-list__card__info-cities";
+    public static final String DOT = ".";
+    public static final String RA_RESUME_BLOCK_EXPERIENCE_LENGTH = "ra-resume__block-experience-length";
+    public static final String RA_RESUME_DESCRIPTION = "ra-resume__description";
+    public static final String RA_RESUME_BLOCK_HEADER_RA_RESUME_BLOCK_HEADER_BIG = "ra-resume__block-header ra-resume__block-header-big";
+    public static final String RA_RESUME_LOCATION = "ra-resume__location";
 
     private SettingsConfig settingsConfig;
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(HtmlContentParseServiceImpl.class);
+    private Logger logger = LoggerFactory.getLogger(HtmlContentParseServiceImpl.class);
+
+    private MongoService mongoService;
 
     @Autowired
-    public HtmlContentParseServiceImpl(SettingsConfig settingsConfig){
+    public HtmlContentParseServiceImpl(SettingsConfig settingsConfig, MongoService mongoService){
         this.settingsConfig = settingsConfig;
+        this.mongoService = mongoService;
     }
 
-    public List<ResumeDto> parse() throws Exception {
+    public List<CategoryDto> getCategories() throws Exception {
         Document doc;
         try {
             doc = Jsoup.connect(settingsConfig.getUrl()).get();
-            String title = doc.title();
 
             List<CategoryDto> categories = getCategories(doc);
-            List<ResumeDto> resumes = getResumes(categories);
 
             categories.stream().map(CategoryDto::toString).forEach(s -> logger.info(s));
-            return resumes;
+            return categories;
         } catch (IOException e) {
             throw new Exception("Cannot get data. Reason: " + e.getMessage());
         }
 
     }
 
-    private List<ResumeDto> getResumes(List<CategoryDto> categories) {
+    public List<ResumeDto> getResumes(List<CategoryDto> categories) {
         List<ResumeDto> resumeList = new ArrayList<>();
         for (CategoryDto category : categories) {
             String url = settingsConfig.getUrl() + category.getLink();
@@ -79,14 +93,20 @@ public class HtmlContentParseServiceImpl implements HtmlContentParseService {
             Function<HtmlPage, Boolean> expression = page -> page.getByXPath(xpathExpr).get(0) != null
                     && ((HtmlDivision) page.getByXPath(xpathExpr).get(0)).getChildElementCount() <= 1;
             HtmlPage page = getHtmlPageWaitingForJavascript(url, expression);
+            if(page == null){
+                logger.error("Cannot load page for url: " + url);
+                continue;
+            }
             Document parse = Jsoup.parse(page.asXml());
             Element resumeBox = parse.getElementsByClass(RESUME_BOX).first();
             Iterator<Element> resumeIterator = resumeBox.children().iterator();
-            while (resumeIterator.hasNext()){
+            int max = MAX_RESUME_COUNT;
+            while (resumeIterator.hasNext() && max > 0){
+                max--;
                 Element resumeElement = resumeIterator.next();
                 Element resumeLink = resumeElement.getElementsByClass(RESUME_TITLE_LINK).first();
                 String href = resumeLink.attr(HREF);
-                ResumeDto resume = getResume(href);
+                ResumeDto resume = getResume(href, category.getId());
                 resumeList.add(resume);
             }
         }
@@ -126,7 +146,7 @@ public class HtmlContentParseServiceImpl implements HtmlContentParseService {
         }
     }
 
-    private ResumeDto getResume(String href){
+    private ResumeDto getResume(String href, String categoryId){
         ResumeDto resume = new ResumeDto();
         String url = settingsConfig.getUrl() + href;
         String xpathExpr = String.format(XPATH_BY_CLASS_STRING_FORMAT, RA_RESUME_CARD_VIEW_ACTIVE);
@@ -135,16 +155,30 @@ public class HtmlContentParseServiceImpl implements HtmlContentParseService {
                 || ((HtmlDivision) page.getByXPath(xpathExpr).get(0)).getChildElementCount() <= 1;
         HtmlPage htmlPage = getHtmlPageWaitingForJavascript(url, expression);
         if(htmlPage == null){
-            logger.error("Cannot load page");
+            logger.error("Cannot load page for url: " + url);
             return resume;
         }
         Document parse = Jsoup.parse(htmlPage.asXml());
-        String header = parse.getElementsByClass(RA_RESUME_MAIN_HEADER).first().text();
-        Element ageBox = parse.select(RA_RESUME_AGE + GT + SPAN).first();
+        Element headerBox = parse.getElementsByClass(RA_RESUME_MAIN_HEADER).first();
+        String header = headerBox == null ? "" : headerBox.text();
+        Element ageBox = parse.select(DIV + DOT + RA_RESUME_AGE + GT + SPAN).first();
         String dateOfBirth = ageBox == null ? "" : ageBox.text().replaceAll("\\(", "").replaceAll("\\)", "");
+        Elements citiesBox = parse.getElementsByClass(RA_ELEMENTS_LIST_CARD_INFO_CITIES);
+        Elements locationBox = parse.getElementsByClass(RA_RESUME_LOCATION);
+        String location = citiesBox == null
+                ? (locationBox == null ? "" : locationBox.text())
+                : citiesBox.text();
+        String jobAreaExperience = parse.select(DIV + DOT + RA_RESUME_BLOCK_EXPERIENCE_LENGTH + GT + SPAN).text();
+        String description = parse.getElementsByClass(RA_RESUME_DESCRIPTION).text();
+        String educationLevel = parse.select(DIV + DOT + RA_RESUME_BLOCK_HEADER_RA_RESUME_BLOCK_HEADER_BIG + GT + SPAN).text();
 
+        resume.setCategoryId(categoryId);
         resume.setName(header);
         resume.setDateOfBirth(dateOfBirth);
+        resume.setLocation(location);
+        resume.setJobAreaExperience(jobAreaExperience);
+        resume.setDescription(description);
+        resume.setEducationLevel(educationLevel);
         return resume;
     }
 

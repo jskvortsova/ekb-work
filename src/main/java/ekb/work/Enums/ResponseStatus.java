@@ -1,4 +1,4 @@
-package ekb.work.Enums;
+package ekb.work.enums;
 
 /**
  * Created by juliaskvortsova on 9/4/16.

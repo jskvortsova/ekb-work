@@ -1,7 +1,7 @@
-package ekb.work.Domain;
+package ekb.work.domain;
 
 
-import ekb.work.Enums.ResponseStatus;
+import ekb.work.enums.ResponseStatus;
 
 /**
  * Created by juliaskvortsova on 9/4/16.

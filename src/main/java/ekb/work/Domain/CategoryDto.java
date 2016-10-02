@@ -1,4 +1,6 @@
-package ekb.work.Domain;
+package ekb.work.domain;
+
+import ekb.work.entity.CategoryEntity;
 
 import java.util.List;
 
@@ -9,7 +11,6 @@ public class CategoryDto {
     private String id;
     private String name;
     private String link;
-    private List<CategoryDto> subCategories;
 
     public CategoryDto(String id, String name, String link) {
         this.id = id;
@@ -41,12 +42,11 @@ public class CategoryDto {
         this.link = link;
     }
 
-    public List<CategoryDto> getSubCategories() {
-        return subCategories;
-    }
-
-    public void setSubCategories(List<CategoryDto> subCategories) {
-        this.subCategories = subCategories;
+    public CategoryEntity toCategoryEntity(){
+        CategoryEntity categoryEntity = new CategoryEntity();
+        categoryEntity.setId(this.getId());
+        categoryEntity.setName(this.getName());
+        return categoryEntity;
     }
 
     @Override
