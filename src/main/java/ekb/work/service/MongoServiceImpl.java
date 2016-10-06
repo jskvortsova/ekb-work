@@ -6,9 +6,12 @@ import ekb.work.entity.ResumeEntity;
 import ekb.work.repository.RepositoryImpl;
 //import ekb.work.repository.ResumeRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by juliaskvortsova on 9/21/16.
@@ -16,16 +19,7 @@ import java.util.List;
 @Service
 public class MongoServiceImpl implements MongoService {
 
-//    CategoryRepositoryImpl categoryRepository;
-//    ResumeRepositoryImpl resumeRepository;
     RepositoryImpl repository;
-
-//    @Autowired
-//    public MongoServiceImpl(CategoryRepositoryImpl categoryRepository, ResumeRepositoryImpl resumeRepository) {
-//        this.categoryRepository = categoryRepository;
-//        this.resumeRepository = resumeRepository;
-//    }
-
 
     @Autowired
     public MongoServiceImpl(RepositoryImpl repository) {
@@ -38,29 +32,39 @@ public class MongoServiceImpl implements MongoService {
     }
 
     @Override
+    public List<ResumeEntity> getResumes() {
+        return repository.findAll(ResumeEntity.class);
+    }
+
+    @Override
     public void saveCategories(List<CategoryEntity> categoryEntities) throws Exception {
-//        for (CategoryEntity categoryEntity : categoryEntities) {
-//            categoryRepository.save(categoryEntity);
-//        }
-//        categoryRepository.saveAll(categoryEntities);
         repository.saveAll(categoryEntities);
     }
 
     @Override
     public void saveResumes(List<ResumeEntity> resumeEntities) throws Exception {
-//        for (ResumeEntity resumeEntity : resumeEntities) {
-//            resumeRepository.save(resumeEntity);
-//        }
-//        resumeRepository.saveAll(resumeEntities);
         repository.saveAll(resumeEntities);
 
     }
 
     @Override
+    public void saveResume(ResumeEntity resumeEntity) {
+        repository.save(resumeEntity);
+    }
+
+    @Override
     public void clearAll() {
-//        categoryRepository.clearAll();
-//        resumeRepository.clearAll();
         repository.clearAll(CategoryEntity.class);
         repository.clearAll(ResumeEntity.class);
+    }
+
+    @Override
+    public List<CategoryEntity> getCategories(Map<String, String> params) {
+        return repository.findAll(params, CategoryEntity.class);
+    }
+
+    @Override
+    public List<ResumeEntity> getResumes(Map<String, String> params) {
+        return repository.findAll(params, ResumeEntity.class);
     }
 }

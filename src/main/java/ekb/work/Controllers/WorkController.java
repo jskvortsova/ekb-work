@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -36,25 +37,37 @@ public class WorkController {
         mongoService.clearAll();
 
         List<CategoryDto> categories = htmlContentParseService.getCategories();
-
         List<CategoryEntity> categoryEntities = categories.stream().map(c -> c.toCategoryEntity()).collect(toList());
         mongoService.saveCategories(categoryEntities);
 
         List<ResumeDto> resumes = htmlContentParseService.getResumes(categories);
         List<ResumeEntity> resumeEntities = resumes.stream().map(r -> r.toResumeEntity()).collect(toList());
+        mongoService.saveResumes(resumeEntities);
 
         ResponseDto responseDto = new ResponseDto();
-        responseDto.setResponse(resumes);
+        responseDto.setResponse(String.format("%d documents loaded", categoryEntities.size() + resumeEntities.size()));
         responseDto.setStatus(ResponseStatus.SUCCESS);
         return responseDto;
     }
 
     @RequestMapping(value = {"/categories"}, method = RequestMethod.GET)
-    public ResponseDto getCategories() throws Exception {
-        List<CategoryEntity> categories = mongoService.getCategories();
+    public ResponseDto getCategories(@RequestParam Map<String, String> params) throws Exception {
+
+        List<CategoryEntity> categories = mongoService.getCategories(params);
 
         ResponseDto responseDto = new ResponseDto();
         responseDto.setResponse(categories);
+        responseDto.setStatus(ResponseStatus.SUCCESS);
+        return responseDto;
+    }
+
+    @RequestMapping(value = {"/resume"}, method = RequestMethod.GET)
+    public ResponseDto getResumes(@RequestParam Map<String, String> params) throws Exception {
+
+        List<ResumeEntity> resumes = mongoService.getResumes(params);
+
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setResponse(resumes);
         responseDto.setStatus(ResponseStatus.SUCCESS);
         return responseDto;
     }

@@ -1,7 +1,5 @@
 package ekb.work.entity;
 
-import ekb.work.domain.EducationDto;
-import ekb.work.domain.ExperienceDto;
 import ekb.work.domain.LanguageLevelDto;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,10 +25,8 @@ public class ResumeEntity {
     private List<String> workTypes;
     private String totalExperience;
     private String jobAreaExperience;
-    private List<ExperienceDto> experience;
     private String description;
     private String educationLevel;
-    private List<EducationDto> education;
     private String additionalInformation;
     private List<LanguageLevelDto> languages;
     private String locationPreference;
@@ -116,14 +112,6 @@ public class ResumeEntity {
         this.jobAreaExperience = jobAreaExperience;
     }
 
-    public List<ExperienceDto> getExperience() {
-        return experience;
-    }
-
-    public void setExperience(List<ExperienceDto> experience) {
-        this.experience = experience;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -138,14 +126,6 @@ public class ResumeEntity {
 
     public void setEducationLevel(String educationLevel) {
         this.educationLevel = educationLevel;
-    }
-
-    public List<EducationDto> getEducation() {
-        return education;
-    }
-
-    public void setEducation(List<EducationDto> education) {
-        this.education = education;
     }
 
     public String getAdditionalInformation() {

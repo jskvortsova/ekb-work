@@ -18,14 +18,13 @@ public class ResumeDto {
     private List<String> workTypes;
     private String totalExperience;
     private String jobAreaExperience;
-    private List<ExperienceDto> experience;
     private String description;
     private String educationLevel;
-    private List<EducationDto> education;
     private String additionalInformation;
     private List<LanguageLevelDto> languages;
     private String locationPreference;
     private String categoryId;
+    private String link;
 
     public String getId() {
         return id;
@@ -107,14 +106,6 @@ public class ResumeDto {
         this.jobAreaExperience = jobAreaExperience;
     }
 
-    public List<ExperienceDto> getExperience() {
-        return experience;
-    }
-
-    public void setExperience(List<ExperienceDto> experience) {
-        this.experience = experience;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -129,14 +120,6 @@ public class ResumeDto {
 
     public void setEducationLevel(String educationLevel) {
         this.educationLevel = educationLevel;
-    }
-
-    public List<EducationDto> getEducation() {
-        return education;
-    }
-
-    public void setEducation(List<EducationDto> education) {
-        this.education = education;
     }
 
     public String getAdditionalInformation() {
@@ -171,6 +154,14 @@ public class ResumeDto {
         this.categoryId = categoryId;
     }
 
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
     public ResumeEntity toResumeEntity(){
         ResumeEntity resumeEntity = new ResumeEntity();
         resumeEntity.setId(getId());
@@ -179,9 +170,7 @@ public class ResumeDto {
         resumeEntity.setAdditionalInformation(getAdditionalInformation());
         resumeEntity.setDateOfBirth(getDateOfBirth());
         resumeEntity.setDescription(getDescription());
-        resumeEntity.setEducation(getEducation());
         resumeEntity.setEducationLevel(getEducationLevel());
-        resumeEntity.setExperience(getExperience());
         resumeEntity.setTotalExperience(getTotalExperience());
         resumeEntity.setJobAreaExperience(getJobAreaExperience());
         resumeEntity.setJobTitle(getJobTitle());

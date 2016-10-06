@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("settings")
 public class SettingsConfig {
     private String url;
+    private Integer maxResumeCount;
 
     public String getUrl() {
         return url;
@@ -17,5 +18,13 @@ public class SettingsConfig {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Integer getMaxResumeCount() {
+        return maxResumeCount;
+    }
+
+    public void setMaxResumeCount(Integer maxResumeCount) {
+        this.maxResumeCount = maxResumeCount;
     }
 }
